@@ -6,7 +6,7 @@
 #include "RoutTableAdder.h"
 #include "ProxyTableAdder.h"
 #include "IPLayer.h"
-
+#include "stdio.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
