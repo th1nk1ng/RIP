@@ -130,4 +130,5 @@ public:
 	CIPAddressCtrl m_nic2_ip;
 
 	void OnTimer(UINT nIDEvent);
+	afx_msg void OnLvnItemchangedRoutingTable(NMHDR *pNMHDR, LRESULT *pResult);
 };
