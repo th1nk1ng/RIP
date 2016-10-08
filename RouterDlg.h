@@ -63,7 +63,7 @@ public:
 	pcap_if_t *Devices_2; //interface 1
 
 	typedef struct _RoutingTable{
-		unsigned char Destnation[4];
+		unsigned char Destination[4];
 		unsigned char Netmask[4];
 		unsigned char Gateway[4];
 		unsigned char Flag;
@@ -90,12 +90,19 @@ public:
 		unsigned int metric;
 	}RIPMessage;
 	
+	unsigned char zeroNextHop[4];
+	unsigned char generalNetmask[4];
+
+	void generateNewRIPMessage(RIPMessage *newMessage, 
+	                           unsigned char ipAddress[4],
+							   unsigned char netmask[4],
+							   unsigned char nextHop[4],
+							   unsigned int metric);
+
 	void setHeaderAsRequest(RIPHeader *header);
 	void setHeaderAsResponse(RIPHeader *header);
 
 	int sendRIP(void);
-	int receiveRIP(void);
-
 
 public:
 	CListCtrl ListBox_RoutingTable;

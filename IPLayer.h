@@ -36,7 +36,7 @@ public:
 		};
 		unsigned char		Ip_data[IP_MAX_DATA];
 	}IpHeader, *PIpHeader;
-private:
+
 	unsigned char dev_1_ip_addr[4];
 	unsigned char dev_2_ip_addr[4];
 	inline void		ResetHeader( );		// IP 헤더 초기화 함수

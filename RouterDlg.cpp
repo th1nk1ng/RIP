@@ -161,6 +161,11 @@ BOOL CRouterDlg::OnInitDialog()
 	ListBox_ARPProxyTable.InsertColumn(1,_T("IP address"),LVCFMT_CENTER,120,-1);
 	ListBox_ARPProxyTable.InsertColumn(2,_T("Mac address"),LVCFMT_CENTER,120,-1);
 
+	memset(zeroNextHop, 0, sizeof(char) * 4);
+
+	memset(generalNetmask, 0xff, sizeof(char) * 4);
+	generalNetmask[3] = 0x0;
+
 	SetTimer(TICKING_CLOCK, TICKING_INTERVAL, NULL);
 	SetTimer(UPDATE_TIMER, UPDATE_INTERVAL, NULL);
 	setNicList(); //NicList Setting
@@ -332,7 +337,7 @@ void CRouterDlg::OnBnClickedRoutingAdd()
 	// router Table Add버튼
 	if( RtDlg.DoModal() == IDOK ){
 		RoutingTableTuple rt;
-		memcpy(&rt.Destnation,RtDlg.GetDestIp(),6);
+		memcpy(&rt.Destination,RtDlg.GetDestIp(),6);
 		rt.Flag = RtDlg.GetFlag();
 		memcpy(&rt.Gateway,RtDlg.GetGateway(),6);
 		memcpy(&rt.Netmask,RtDlg.GetNetmask(),6);
@@ -377,7 +382,7 @@ void CRouterDlg::setNicList(void)
 void CRouterDlg::add_route_table(unsigned char dest[4],unsigned char netmask[4],unsigned char gateway[4],unsigned char flag,char Interface[100],int metric)
 {
 	RoutingTableTuple rt;
-	memcpy(&rt.Destnation,dest,4);
+	memcpy(&rt.Destination,dest,4);
 	memcpy(&rt.Netmask,netmask,4);
 	memcpy(&rt.Gateway,gateway,4);
 	rt.Flag = flag;
@@ -396,7 +401,7 @@ void CRouterDlg::UpdateRouteTable(void)
 		flag = "";
 		index = route_table.FindIndex(i);
 		entry = route_table.GetAt(index);
-		dest.Format("%d.%d.%d.%d",entry.Destnation[0],entry.Destnation[1],entry.Destnation[2],entry.Destnation[3]);
+		dest.Format("%d.%d.%d.%d",entry.Destination[0],entry.Destination[1],entry.Destination[2],entry.Destination[3]);
 		netmask.Format("%d.%d.%d.%d",entry.Netmask[0],entry.Netmask[1],entry.Netmask[2],entry.Netmask[3]);
 		
 		if(entry.Metric == 1) {
@@ -441,7 +446,7 @@ int CRouterDlg::Routing(unsigned char destip[4]) {
 				result[j] = destip[j] & entry.Netmask[j];
 
 			/* destination이 같은 경우 */
-			if(!memcmp(result,entry.Destnation,4)){ 
+			if(!memcmp(result,entry.Destination,4)){ 
 
 				/* gateway로 보내는 경우 */
 				if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x02)){ 
@@ -467,7 +472,7 @@ int CRouterDlg::Routing(unsigned char destip[4]) {
 					result[j] = destip[j] & entry.Netmask[j];
 
 				/* destation이 같은 경우 */
-				if(!memcmp(result,entry.Destnation,4)){ 
+				if(!memcmp(result,entry.Destination,4)){ 
 
 					/* gateway로 보내는 경우 */
 					if(((entry.Flag & 0x01) == 0x01) && ((entry.Flag & 0x02) == 0x02)){ 
@@ -517,42 +522,78 @@ int CRouterDlg::sendRIP()
 	setHeaderAsRequest(&header);
 
 	vector<RIPMessage> messageList;
-
+	
 	POSITION index;
 	for(int i = 0; i < route_table.GetCount(); i++){
 		RIPMessage newMessage;
 
 		index = route_table.FindIndex(i);
 		
-		newMessage.address_family = htons(0x0002);
-		newMessage.route_tag = htons(0x0002);
-		memcpy(newMessage.ip_address, route_table.GetAt(index).Destnation, sizeof(char) * 4);
-		memcpy(newMessage.subnet_mask, route_table.GetAt(index).Netmask, sizeof(char) * 4);
-		memset((void*)newMessage.nexthop_ip_address, 0, sizeof(char) * 4);  // Only for linear topology
-		newMessage.metric = route_table.GetAt(index).Metric;
-
+		generateNewRIPMessage(&newMessage,
+			                  route_table.GetAt(index).Destination,
+							  route_table.GetAt(index).Netmask,
+							  zeroNextHop,
+							  route_table.GetAt(index).Metric);
 		messageList.push_back(newMessage);
 	}
 	
 	unsigned char ppayload[1480];
-	memcpy(ppayload, (unsigned char *)&header, sizeof(RIPHeader));
+	int size = 0;
+
+	memcpy(ppayload, (unsigned char*)route_table.GetCount(), sizeof(int));
+	size += sizeof(int);
+
+	memcpy(ppayload + sizeof(int), (unsigned char *)&header, sizeof(RIPHeader));
+	size += sizeof(RIPHeader);
+
 	for(int i = 0; i < route_table.GetCount(); i++){
-		memcpy(ppayload + sizeof(RIPHeader) + (sizeof(RIPMessage) * i), (unsigned char *)&(messageList.at(i)), sizeof(RIPMessage));
-		
+		memcpy(ppayload + sizeof(int) + sizeof(RIPHeader) + (sizeof(RIPMessage) * i), 
+			   (unsigned char *)&(messageList.at(i)), 
+			   sizeof(RIPMessage));
+		size += sizeof(RIPMessage);
 	}
 
+	unsigned char ppayload_copy[1480];
+	memcpy(ppayload_copy, ppayload, size);
+
+	RIPMessage leftMessage;
+	generateNewRIPMessage(&leftMessage,
+		                  m_IPLayer->dev_1_ip_addr,
+						  generalNetmask,
+						  zeroNextHop,
+						  0);
+	memcpy(ppayload + size, (unsigned char *)&leftMessage, sizeof(RIPMessage));
 	m_UDPLayer->Send((unsigned char *)ppayload, strlen((const char *)ppayload), 1);
-	m_UDPLayer->Send((unsigned char *)ppayload, strlen((const char *)ppayload), 2);
+
+	RIPMessage rightMessage;
+	generateNewRIPMessage(&rightMessage,
+		                  m_IPLayer->dev_2_ip_addr,
+						  generalNetmask,
+						  zeroNextHop,
+						  0);
+	memcpy(ppayload_copy + size, (unsigned char *)&rightMessage, sizeof(RIPMessage));
+	m_UDPLayer->Send((unsigned char *)ppayload_copy, strlen((const char *)ppayload_copy), 2);
 	
 	return 0;
 }
 
-int CRouterDlg::receiveRIP(void)
+BOOL Receive(unsigned char* ppayload, int dev_num)
 {
-	return 0;
+	
 }
 
-
+void CRouterDlg::generateNewRIPMessage(RIPMessage *newMessage, 
+	                                   unsigned char ipAddress[4],
+									   unsigned char netmask[4],
+									   unsigned char nextHop[4],
+									   unsigned int metric){
+	newMessage->address_family = htons(2);
+	newMessage->route_tag = htons(1);
+	memcpy(newMessage->ip_address, ipAddress, sizeof(char) * 4);
+	memcpy(newMessage->subnet_mask, netmask, sizeof(char) * 4);
+	memcpy(newMessage->nexthop_ip_address, nextHop, sizeof(char) * 4);
+	newMessage->metric = metric;
+}
 void CRouterDlg::setHeaderAsRequest(RIPHeader *header)
 {
 	header->command = 1;

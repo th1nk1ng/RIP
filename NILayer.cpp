@@ -30,7 +30,7 @@ BOOL CNILayer::Receive(int dev_num)
 	int result;
 	result = pcap_next_ex(Device[dev_num-1],&pkt_header[dev_num-1],(const unsigned char **)&pkt_data[dev_num-1]);
 	if(result == 1){
-		mp_aUpperLayer[0]->Receive(pkt_data[dev_num-1],dev_num);	// 상위 계층으로 전달한다.
+		mp_aUpperLayer[0]->Receive(pkt_data[dev_num-1], dev_num);	// 상위 계층으로 전달한다.
 		return TRUE;
 	}
 	mutex.Unlock();
