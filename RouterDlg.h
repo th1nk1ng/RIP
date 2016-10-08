@@ -21,6 +21,13 @@
 #define UPDATE_INTERVAL				30000
 #define EXPIRATION_INTERVAL			180000
 #define GARBAGE_COLLECTION_INTERVAL	120000
+
+#define RIP_VER_2					2
+#define RIP_COMMAND_REQ	            1
+#define RIP_COMMAND_RES			    2
+
+#define RIP_HEADER_SIZE				16
+#define MAX_HOP						16
 // CRouterDlg 대화 상자
 class CRouterDlg : public CDialog, public CBaseLayer
 {
@@ -74,13 +81,9 @@ public:
 	}RoutingTableTuple,*RoutingTableTuplePtr;
 
 	CList<RoutingTableTuple, RoutingTableTuple&> route_table;
-
-	typedef struct _RIPHeader{
-		unsigned char command;
-		unsigned char version;
-		unsigned short unused;
-	}RIPHeader;
 	
+
+
 	typedef struct _RIPMessage{
 		unsigned short address_family;
 		unsigned short route_tag;
@@ -88,21 +91,34 @@ public:
 		unsigned char subnet_mask[4];
 		unsigned char nexthop_ip_address[4];
 		unsigned int metric;
-	}RIPMessage;
+	}RIPMessage, *PRIPMessage;
+
+	typedef struct _RIPHeader{
+		unsigned char command;
+		unsigned char version;
+		unsigned short unused;
+		unsigned int messageCount;
+		RIPMessage messages[25];
+	}RIPHeader, *PRIPHeader;
+	
 	
 	unsigned char zeroNextHop[4];
 	unsigned char generalNetmask[4];
-
+	
+	unsigned char currentIPSrc[4];
+	int generateReplyRIPMessage(RIPHeader *header);
 	void generateNewRIPMessage(RIPMessage *newMessage, 
 	                           unsigned char ipAddress[4],
 							   unsigned char netmask[4],
 							   unsigned char nextHop[4],
 							   unsigned int metric);
+	int updateRouterTableTuples(RIPHeader *header, int dev_num);
 
-	void setHeaderAsRequest(RIPHeader *header);
-	void setHeaderAsResponse(RIPHeader *header);
-
+	void setHeader(RIPHeader *header, unsigned char command);
 	int sendRIP(void);
+	BOOL Receive(unsigned char* ppayload, int dev_num);
+
+	CCriticalSection sc;
 
 public:
 	CListCtrl ListBox_RoutingTable;
@@ -122,7 +138,13 @@ public:
 	// NicList Set
 	void setNicList(void);
 	afx_msg void OnCbnSelchangeNic1Combo();
-	void add_route_table(unsigned char dest[4],unsigned char netmask[4],unsigned char gateway[4],unsigned char flag,char Interface[100],int metric);
+	void add_route_table(unsigned char dest[4],
+		                 unsigned char netmask[4],
+						 unsigned char gateway[4],
+						 unsigned char flag,
+						 //char Interface[100],
+						 int Interface,
+						 int metric);
 	// UpdateRouteTable
 	void UpdateRouteTable(void);
 	afx_msg void OnCbnSelchangeNic2Combo();
