@@ -7,6 +7,7 @@
 #include "IPLayer.h"
 #include "NILayer.h"
 #include "EthernetLayer.h"
+#include "UDPLayer.h"
 #include "LayerManager.h"
 #include "afxcmn.h"
 #include "afxwin.h"
@@ -50,6 +51,8 @@ public: //layer
 	CARPLayer		*m_ARPLayer;
 	CIPLayer		*m_IPLayer;
 	CLayerManager	 m_LayerMgr;
+	CUDPLayer		*m_UDPLayer;
+
 	pcap_if_t *Device1;
 	pcap_if_t *Device2;
 	CRoutTableAdder RtDlg;
