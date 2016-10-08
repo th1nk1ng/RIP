@@ -7,8 +7,9 @@
 #include "ProxyTableAdder.h"
 #include "IPLayer.h"
 #include <vector>
-using namespace std;
 #include "stdio.h"
+
+using namespace std;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
