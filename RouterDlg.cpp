@@ -541,8 +541,10 @@ int CRouterDlg::sendRIP()
 		
 	}
 
-	CRouterDlg.m_UDPLayer.Send((unsigned char *)ppayload, strlen((const char *)ppayload), 1);
-	CRouterDlg.m_UDPLayer.Send((unsigned char *)ppayload, strlen((const char *)ppayload), 2);
+	m_UDPLayer->Send((unsigned char *)ppayload, strlen((const char *)ppayload), 1);
+	m_UDPLayer->Send((unsigned char *)ppayload, strlen((const char *)ppayload), 2);
+	
+	return 0;
 }
 
 int CRouterDlg::receiveRIP(void)
