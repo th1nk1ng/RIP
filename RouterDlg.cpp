@@ -385,7 +385,7 @@ void CRouterDlg::add_route_table(unsigned char dest[4],unsigned char netmask[4],
 	rt.Metric = metric;
 }
 
-// UpdateRouteTable
+//UpdateRouteTable
 void CRouterDlg::UpdateRouteTable(void)
 {
 	ListBox_RoutingTable.DeleteAllItems();
@@ -490,17 +490,34 @@ int CRouterDlg::Routing(unsigned char destip[4]) {
 
 void CRouterDlg::OnTimer(UINT nIDEvent) 
 {
+	POSITION index;
+	RoutingTableTuple entry; //head position
 	switch(nIDEvent){
 	case TICKING_CLOCK:
+		for(int i=0;i<route_table.GetCount();i++){
+			index = route_table.FindIndex(i);
+			entry = route_table.GetAt(index);
+			entry.expirationTime--;
+			entry.garbageCollectionTime--;
+			//hop을 16으로 바꿈.
+			if( entry.expirationTime==0)
+			{
+				entry.Metric=16;
+			}
+			//테이블에서 삭제.
+			if( entry.garbageCollectionTime==0)
+			{
+				route_table.RemoveAt(index);
+				UpdateRouteTable();
+			}
+		}
 		break;
+	//주기적인 타이머, 30초마다 갱신 메시지를 보냄.
 	case UPDATE_TIMER:
 		sendRIP();
 		break;
-	case EXPIRATION_TIMER:
-		break;
-	case GARBAGE_COLLECTION_TIMER:
-		break;
 	}
+	CDialog::OnTimer(nIDEvent);
 }
 
 void CRouterDlg::OnCbnSelchangeNic1Combo()
