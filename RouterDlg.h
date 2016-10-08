@@ -104,15 +104,16 @@ public:
 	
 	unsigned char zeroNextHop[4];
 	unsigned char generalNetmask[4];
-	
+	unsigned char multicast[6];
 	unsigned char currentIPSrc[4];
+
 	int generateReplyRIPMessage(RIPHeader *header);
 	void generateNewRIPMessage(RIPMessage *newMessage, 
 	                           unsigned char ipAddress[4],
 							   unsigned char netmask[4],
 							   unsigned char nextHop[4],
 							   unsigned int metric);
-	int updateRouterTableTuples(RIPHeader *header, int dev_num);
+	void updateRouterTableTuples(RIPHeader *header, int dev_num);
 
 	void setHeader(RIPHeader *header, unsigned char command);
 	int sendRIP(void);

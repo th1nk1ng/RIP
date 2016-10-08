@@ -167,6 +167,10 @@ BOOL CRouterDlg::OnInitDialog()
 	memset(generalNetmask, 0xff, sizeof(char) * 4);
 	generalNetmask[3] = 0x0;
 
+	memset(multicast, 0, sizeof(char) * 4);
+	multicast[0] = 0xE0;
+	multicast[3] = 0x09;
+
 	SetTimer(TICKING_CLOCK, TICKING_INTERVAL, NULL);
 	SetTimer(UPDATE_TIMER, UPDATE_INTERVAL, NULL);
 	setNicList(); //NicList Setting
@@ -616,6 +620,11 @@ BOOL CRouterDlg::Receive(unsigned char* ppayload, int dev_num)
 
 		sc.Lock();
 		size = generateReplyRIPMessage(&newHeader);
+		if(dev_num == 1)
+			memcpy(m_EthernetLayer->dev_1_mac_addr, multicast, sizeof(char) * 6);
+		else
+			memcpy(m_EthernetLayer->dev_2_mac_addr, multicast, sizeof(char) * 6);
+
 		bSuccess = mp_UnderLayer->Send((unsigned char*)&newHeader, 
 			                           RIP_HEADER_SIZE + ((size+1) * sizeof(RIPMessage)),
 									   dev_num);
@@ -653,12 +662,12 @@ int CRouterDlg::generateReplyRIPMessage(RIPHeader *header)
 							  route_table.GetAt(index).Metric);
 		header->messages[header->messageCount++] = newMessage;
 	}
-
-	return size;
+	
 	sc.Unlock();
+	return size;
 }
 
-int CRouterDlg::updateRouterTableTuples(RIPHeader *header, int dev_num)
+void CRouterDlg::updateRouterTableTuples(RIPHeader *header, int dev_num)
 {
 	int count = header->messageCount;
 	for(int i = 0; i < count; i++){
@@ -679,19 +688,25 @@ int CRouterDlg::updateRouterTableTuples(RIPHeader *header, int dev_num)
 		newTuple.garbageCollectionTime = GARBAGE_COLLECTION_INTERVAL;
 
 		BOOL isNewTuple = TRUE;
+
+		//Check is it new Tuple or not.
 		for(int j = 0; j < route_table.GetCount(); j++){
 			POSITION index;
 			index = route_table.FindIndex(i);
 			if(!memcmp(route_table.GetAt(index).Destination, message.ip_address, sizeof(char) * 4)){
 				isNewTuple = FALSE;
 				route_table.GetAt(index).Metric = newTuple.Metric;
+				route_table.GetAt(index).expirationTime = EXPIRATION_INTERVAL;
+				route_table.GetAt(index).garbageCollectionTime = GARBAGE_COLLECTION_INTERVAL;
 				break;
 			}
 		}
 
+		//Add to route_table if it is new tuple
 		if(newTuple.Metric < MAX_HOP && isNewTuple)
 		{
 			route_table.AddTail(newTuple);
+			UpdateRouteTable();
 		}
 	}
 }
@@ -707,6 +722,7 @@ void CRouterDlg::generateNewRIPMessage(RIPMessage *newMessage,
 	memcpy(newMessage->nexthop_ip_address, nextHop, sizeof(char) * 4);
 	newMessage->metric = metric;
 }
+
 void CRouterDlg::setHeader(RIPHeader *header, unsigned char command)
 {
 	header->command = command;

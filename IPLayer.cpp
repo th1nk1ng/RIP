@@ -50,6 +50,7 @@ BOOL CIPLayer::Receive(unsigned char* ppayload,int dev_num)
 	unsigned char destip[4];
 	memset(destip,0,4);
 	memcpy(destip,pFrame->Ip_dstAddressByte,4);
+	memcpy(((CRouterDlg *)GetUpperLayer(0))->currentIPSrc, pFrame->Ip_srcAddressByte, 4);
 	int dev = ((CRouterDlg *)GetUpperLayer(0))->Routing(destip);
 	if(dev != -1){
 		((CRouterDlg *)GetUpperLayer(0))->m_ARPLayer->Send((unsigned char *)pFrame,
