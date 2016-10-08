@@ -12,12 +12,14 @@
 #include "afxwin.h"
 #include "RoutTableAdder.h"
 
+#define TICKING_CLOCK				1
 #define UPDATE_TIMER				2
 #define EXPIRATION_TIMER			3
 #define GARBAGE_COLLECTION_TIMER	4
-#define UPDATE_INTERVAL				30
-#define EXPIRATION_INTERVAL			180
-#define GARBAGE_COLLECTION_INTERVAL	120
+#define TICKING_INTERVAL			1000
+#define UPDATE_INTERVAL				30000
+#define EXPIRATION_INTERVAL			180000
+#define GARBAGE_COLLECTION_INTERVAL	120000
 // CRouterDlg 대화 상자
 class CRouterDlg : public CDialog, public CBaseLayer
 {

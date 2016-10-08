@@ -155,6 +155,8 @@ BOOL CRouterDlg::OnInitDialog()
 	ListBox_ARPProxyTable.InsertColumn(1,_T("IP address"),LVCFMT_CENTER,120,-1);
 	ListBox_ARPProxyTable.InsertColumn(2,_T("Mac address"),LVCFMT_CENTER,120,-1);
 
+	SetTimer(TICKING_CLOCK, TICKING_INTERVAL, NULL);
+	SetTimer(UPDATE_TIMER, UPDATE_INTERVAL, NULL);
 	setNicList(); //NicList Setting
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -483,8 +485,17 @@ int CRouterDlg::Routing(unsigned char destip[4]) {
 void CRouterDlg::OnTimer(UINT nIDEvent) 
 {
 	switch(nIDEvent){
-	case UPDATE_TIMER:
+	case TICKING_CLOCK:
 		
+		break;
+	case UPDATE_TIMER:
+		this->sendRIP();
+		break;
+	case EXPIRATION_TIMER:
+
+	case GARBAGE_COLLECTION_TIMER:
+
+
 	}
 }
 
