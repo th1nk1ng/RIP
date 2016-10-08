@@ -1,20 +1,35 @@
 #pragma once
+
+class CRouterDlg{
+}
+
 class CRoutingDaemon
 {
 public:
-	CRoutingDaemon(void);
+	CRoutingDaemon(CRouterDlg *dlg);
 	~CRoutingDaemon(void);
 
-	typedef struct _RIPMessage{
+	typedef struct _RIPHeader{
 		unsigned char command;
 		unsigned char version;
 		unsigned short unused;
+	}RIPHeader;
+	
+	typedef struct _RIPMessage{
 		unsigned short address_family;
 		unsigned short route_tag;
-		unsigned int ip_address;
-		unsigned int subnet_mask;
-		unsigned int nexthop_ip_address;
+		unsigned char ip_address[4];
+		unsigned char subnet_mask[4];
+		unsigned char nexthop_ip_address[4];
 		unsigned int metric;
 	}RIPMessage;
+
+	int send(void);
+	int receive(void);
+	CRouterDlg *dlg;
+	
+private:
+	void setHeaderAsRequest(RIPHeader *header);
+	void setHeaderAsResponse(RIPHeader *header);
 };
 

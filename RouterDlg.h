@@ -11,6 +11,13 @@
 #include "afxcmn.h"
 #include "afxwin.h"
 #include "RoutTableAdder.h"
+
+#define UPDATE_TIMER				2
+#define EXPIRATION_TIMER			3
+#define GARBAGE_COLLECTION_TIMER	4
+#define UPDATE_INTERVAL				30
+#define EXPIRATION_INTERVAL			180
+#define GARBAGE_COLLECTION_INTERVAL	120
 // CRouterDlg 대화 상자
 class CRouterDlg : public CDialog, public CBaseLayer
 {
@@ -56,9 +63,33 @@ public:
 		unsigned char Flag;
 		int Interface; //interface 번호
 		int Metric;
+		int expirationTime;
+		int garbageCollectionTime;
 	}RoutingTable,*RoutingTablePtr;
 
-	CList<RoutingTable,RoutingTable&> route_table;
+	CList<RoutingTable, RoutingTable&> route_table;
+
+	typedef struct _RIPHeader{
+		unsigned char command;
+		unsigned char version;
+		unsigned short unused;
+	}RIPHeader;
+	
+	typedef struct _RIPMessage{
+		unsigned short address_family;
+		unsigned short route_tag;
+		unsigned char ip_address[4];
+		unsigned char subnet_mask[4];
+		unsigned char nexthop_ip_address[4];
+		unsigned int metric;
+	}RIPMessage;
+	
+	void setHeaderAsRequest(RIPHeader *header);
+	void setHeaderAsResponse(RIPHeader *header);
+
+	int sendRIP(void);
+	int receiveRIP(void);
+
 
 public:
 	CListCtrl ListBox_RoutingTable;
@@ -84,4 +115,6 @@ public:
 	afx_msg void OnCbnSelchangeNic2Combo();
 	CIPAddressCtrl m_nic1_ip;
 	CIPAddressCtrl m_nic2_ip;
+
+	void OnTimer(UINT nIDEvent);
 };
