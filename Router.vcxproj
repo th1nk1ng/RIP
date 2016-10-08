@@ -60,6 +60,8 @@
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Template|Win32'" />
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\WpdPack\Include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\WpdPack\Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\WpdPack\Include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\WpdPack\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -69,8 +71,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\WpdPack\Include;C:\WpdPack\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\WpdPack\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;HAVE_REMOTE;WPCAP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -129,6 +131,7 @@
     <ClCompile Include="ProxyTableAdder.cpp" />
     <ClCompile Include="Router.cpp" />
     <ClCompile Include="RouterDlg.cpp" />
+    <ClCompile Include="RoutingDaemon.cpp" />
     <ClCompile Include="RoutTableAdder.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -140,6 +143,7 @@
     <ClCompile Include="IPLayer.cpp" />
     <ClCompile Include="LayerManager.cpp" />
     <ClCompile Include="NILayer.cpp" />
+    <ClCompile Include="UDPLayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Router.ico" />
@@ -154,6 +158,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Router.h" />
     <ClInclude Include="RouterDlg.h" />
+    <ClInclude Include="RoutingDaemon.h" />
     <ClInclude Include="RoutTableAdder.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -163,6 +168,7 @@
     <ClInclude Include="IPLayer.h" />
     <ClInclude Include="LayerManager.h" />
     <ClInclude Include="NILayer.h" />
+    <ClInclude Include="UDPLayer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

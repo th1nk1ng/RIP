@@ -21,6 +21,7 @@
 #define IDC_ROUTING_TABLE               1007
 #define IDC_ROUTING_ADD                 1008
 #define IDC_ROUTING_DELETE              1009
+#define IDC_PROXY_DELETE2               1010
 #define IDC_NIC1_COMBO                  1011
 #define IDC_NIC2_COMBO                  1012
 #define IDC_NIC1                        1013

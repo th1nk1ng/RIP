@@ -52,7 +52,7 @@ BEGIN
     "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)\r\n"
     "LANGUAGE 18, 1\r\n"
     "#pragma code_page(949)\r\n"
-    "#include ""res\\Router.rc2""  // Microsoft Visual C++ AI￠®E¡EcE?UAC ￠®E¡EcE￠®E¡EcIU￠®E¡EcE￠®E¡Ec¡§I￠®¨I¡E￠cE￠®EcI ￠®E¡EcIi￠®E¡EcIi¡E￠cE￠®Ec¡E￠c￠®¡¿u￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡EcE?￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?u¡E￠cE￠®Ec¡E￠c￠®¡¿I ￠®E¡Ec¡E￠c￠®￠?¡E￠cE￠®EciAyCN ￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡EcEc￠®E¡Ec¡E￠c￠®￠?uO￠®E¡Ec¡E￠c￠®￠?o￠®E¡Ec¡E￠c￠®￠?￠®E¡Ec¡§I￠®¨IAO￠®E¡EcE￠®E¡EcII￠®E¡EcE￠®E¡EcIU.\r\n"
+    "//#include ""res\\Router.rc2""  // Microsoft Visual C++ AI￠®E¡EcE?UAC ￠®E¡EcE￠®E¡EcIU￠®E¡EcE￠®E¡Ec¡§I￠®¨I¡E￠cE￠®EcI ￠®E¡EcIi￠®E¡EcIi¡E￠cE￠®Ec¡E￠c￠®¡¿u￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡EcE?￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?u¡E￠cE￠®Ec¡E￠c￠®¡¿I ￠®E¡Ec¡E￠c￠®￠?¡E￠cE￠®EciAyCN ￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡EcEc￠®E¡Ec¡E￠c￠®￠?uO￠®E¡Ec¡E￠c￠®￠?o￠®E¡Ec¡E￠c￠®￠?￠®E¡Ec¡§I￠®¨IAO￠®E¡EcE￠®E¡EcII￠®E¡EcE￠®E¡EcIU.\r\n"
     "#include ""l.KOR\\afxres.rc""      // C¡E￠cE￠®EcIA￠®E¡Ec¡E￠c￠®￠?¡E￠c￠®¡¿¡E￠cI ¡E￠cE￠®Ec¡E￠c￠®¡¿u￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡Ec¡E￠c￠®￠?u￠®E¡Ec¡E￠c￠®￠?￠®E¡Ec¡§I￠®¨I ￠®E¡EcE?a￠®E¡Ec¡E￠c￠®￠?uOAO￠®E¡EcE￠®E¡EcII￠®E¡EcE￠®E¡EcIU.\r\n"
     "#endif\r\n"
     "\0"
@@ -77,36 +77,36 @@ BEGIN
     DEFPUSHBUTTON   "확인",IDOK,113,41,50,14,WS_GROUP
 END
 
-IDD_STATICROUTER_DIALOG DIALOGEX 0, 0, 555, 338
+IDD_STATICROUTER_DIALOG DIALOGEX 0, 0, 555, 282
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "StaticRouter"
+CAPTION "Dynamic Router"
 FONT 9, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "종료",IDCANCEL,490,311,50,14
-    CONTROL         "",IDC_CACHE_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,356,22,174,104
-    CONTROL         "",IDC_PROXY_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,358,178,174,94
-    GROUPBOX        "ARP Cache Table",IDC_STATIC,348,11,191,143
-    PUSHBUTTON      "Delete",IDC_CACHE_DELETE,384,130,52,14
-    PUSHBUTTON      "Delete All",IDC_CACHE_DELETE_ALL,453,130,50,14
-    GROUPBOX        "Proxy ARP Table",IDC_STATIC,348,163,191,139
-    PUSHBUTTON      "Delete",IDC_PROXY_DELETE,421,279,50,14
-    PUSHBUTTON      "Delete All",IDC_PROXY_DELETE_ALL,482,279,50,14
-    PUSHBUTTON      "Add",IDC_PROXY_ADD,358,279,50,14
-    CONTROL         "",IDC_ROUTING_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,22,118,309,156
-    GROUPBOX        "Routing Table",IDC_STATIC,15,108,325,195
-    PUSHBUTTON      "Add",IDC_ROUTING_ADD,220,281,50,14
-    PUSHBUTTON      "Delete",IDC_ROUTING_DELETE,281,281,50,14
-    COMBOBOX        IDC_NIC1_COMBO,53,24,278,35,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_NIC2_COMBO,53,60,278,39,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "NIC 2",IDC_NIC2,25,62,22,14
-    LTEXT           "NIC 1",IDC_NIC1,25,26,25,14
-    GROUPBOX        "Settings",IDC_STATIC,15,11,325,90
-    PUSHBUTTON      "Set",IDC_NIC_SET_BUTTON,281,77,50,14
-    CONTROL         "",IDC_IPADDRESS1,"SysIPAddress32",WS_TABSTOP,53,42,100,12
-    CONTROL         "",IDC_IPADDRESS2,"SysIPAddress32",WS_TABSTOP,53,78,100,12
-    LTEXT           "NIC 1",IDC_NIC3,25,43,25,14
-    LTEXT           "NIC 2",IDC_NIC4,25,80,22,14
+    PUSHBUTTON      "Exit",IDCANCEL,489,260,50,14
+    CONTROL         "",IDC_CACHE_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,356,22,174,86
+    CONTROL         "",IDC_PROXY_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,358,158,174,68
+    GROUPBOX        "ARP Cache Table",IDC_STATIC,348,11,191,126
+    PUSHBUTTON      "Delete",IDC_CACHE_DELETE,383,115,52,14
+    PUSHBUTTON      "Delete All",IDC_CACHE_DELETE_ALL,454,115,50,14
+    GROUPBOX        "Proxy ARP Table",IDC_STATIC,348,143,191,113
+    PUSHBUTTON      "Delete",IDC_PROXY_DELETE,421,232,50,14
+    PUSHBUTTON      "Delete All",IDC_PROXY_DELETE_ALL,482,232,50,14
+    PUSHBUTTON      "Add",IDC_PROXY_ADD,358,232,50,14
+    CONTROL         "",IDC_ROUTING_TABLE,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,17,20,309,132
+    GROUPBOX        "Routing Table",IDC_STATIC,7,7,325,173
+    PUSHBUTTON      "Add",IDC_ROUTING_ADD,213,158,50,14
+    PUSHBUTTON      "Delete",IDC_ROUTING_DELETE,271,157,50,14
+    COMBOBOX        IDC_NIC1_COMBO,63,191,162,62,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_NIC2_COMBO,63,227,164,56,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "NIC 2 List",IDC_NIC2,15,227,40,14
+    LTEXT           "NIC 1 List",IDC_NIC1,15,193,42,14
+    GROUPBOX        "Settings",IDC_STATIC,7,179,325,90
+    PUSHBUTTON      "Set",IDC_NIC_SET_BUTTON,174,245,50,14
+    CONTROL         "",IDC_IPADDRESS1,"SysIPAddress32",WS_TABSTOP,63,210,100,12
+    CONTROL         "",IDC_IPADDRESS2,"SysIPAddress32",WS_TABSTOP,63,246,100,12
+    LTEXT           "NIC 1 IP",IDC_NIC3,14,211,39,14
+    LTEXT           "NIC 2 IP",IDC_NIC4,14,243,38,14
 END
 
 IDD_ROUTE_ADD_DLG DIALOGEX 0, 0, 180, 154
@@ -208,7 +208,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 548
         TOPMARGIN, 7
-        BOTTOMMARGIN, 331
+        BOTTOMMARGIN, 275
     END
 
     IDD_ROUTE_ADD_DLG, DIALOG
@@ -258,8 +258,8 @@ END
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
 LANGUAGE 18, 1
 #pragma code_page(949)
-//#include "res\Router.rc2"  // Microsoft Visual C++ AI¡E￠cE?UAC ¡E￠cE¡E￠cIU¡E￠cE¡E￠c¨I¡ⓒ￠®E¡EcI ¡E￠cIi¡E￠cIi￠®E¡Ec￠®¡×u¡E￠cE¡E￠c¨I¡ⓒ¡E￠cE?¡E￠cE￠®Ec¡E￠c￠®¡¿u￠®E¡Ec￠®¡×I ¡E￠c￠®¡¿￠®E¡EciAyCN ¡E￠cE¡E￠c¨I¡ⓒ¡E￠cEc¡E￠c￠®¡¿uO¡E￠c￠®¡¿o¡E￠c￠®¡¿¡E￠c¨I¡ⓒAO¡E￠cE¡E￠cII¡E￠cE¡E￠cIU.
-#include "l.KOR\afxres.rc"      // C￠®E¡EcIA¡E￠c￠®¡¿￠®¡×￠®I ￠®E¡Ec￠®¡×u¡E￠cE¡E￠c¨I¡ⓒ¡E￠c￠®¡¿u¡E￠c￠®¡¿¡E￠c¨I¡ⓒ ¡E￠cE?a¡E￠c￠®¡¿uOAO¡E￠cE¡E￠cII¡E￠cE¡E￠cIU.
+//#include "res\Router.rc2"  // Microsoft Visual C++ AI￠®E¡EcE?UAC ￠®E¡EcE￠®E¡EcIU￠®E¡EcE￠®E¡Ec¡§I￠®¨I¡E￠cE￠®EcI ￠®E¡EcIi￠®E¡EcIi¡E￠cE￠®Ec¡E￠c￠®¡¿u￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡EcE?￠®E¡EcE¡E￠cEc￠®E¡Ec¡E￠c￠®￠?u¡E￠cE￠®Ec¡E￠c￠®¡¿I ￠®E¡Ec¡E￠c￠®￠?¡E￠cE￠®EciAyCN ￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡EcEc￠®E¡Ec¡E￠c￠®￠?uO￠®E¡Ec¡E￠c￠®￠?o￠®E¡Ec¡E￠c￠®￠?￠®E¡Ec¡§I￠®¨IAO￠®E¡EcE￠®E¡EcII￠®E¡EcE￠®E¡EcIU.
+#include "l.KOR\afxres.rc"      // C¡E￠cE￠®EcIA￠®E¡Ec¡E￠c￠®￠?¡E￠c￠®¡¿¡E￠cI ¡E￠cE￠®Ec¡E￠c￠®¡¿u￠®E¡EcE￠®E¡Ec¡§I￠®¨I￠®E¡Ec¡E￠c￠®￠?u￠®E¡Ec¡E￠c￠®￠?￠®E¡Ec¡§I￠®¨I ￠®E¡EcE?a￠®E¡Ec¡E￠c￠®￠?uOAO￠®E¡EcE￠®E¡EcII￠®E¡EcE￠®E¡EcIU.
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
