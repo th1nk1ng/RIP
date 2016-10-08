@@ -58,13 +58,16 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	m_EthernetLayer = new CEthernetLayer("Ethernet");
 	m_ARPLayer = new CARPLayer("ARP");
 	m_IPLayer = new CIPLayer("IP");
+	m_UDPLayer = new CUDPLayer("UDP");
+	
 	//// Layer 추가										
 	m_LayerMgr.AddLayer( this );				
 	m_LayerMgr.AddLayer( m_NILayer );			
 	m_LayerMgr.AddLayer( m_EthernetLayer );
 	m_LayerMgr.AddLayer( m_ARPLayer );
-	m_LayerMgr.AddLayer( m_IPLayer );			
-
+	m_LayerMgr.AddLayer( m_IPLayer );
+	m_LayerMgr.AddLayer( m_UDPLayer );
+	
 	//Layer연결
 	m_NILayer->SetUpperLayer(m_EthernetLayer);
 	m_EthernetLayer->SetUpperLayer(m_IPLayer);
@@ -72,9 +75,11 @@ CRouterDlg::CRouterDlg(CWnd* pParent /*=NULL*/)
 	m_EthernetLayer->SetUnderLayer(m_NILayer);
 	m_ARPLayer->SetUnderLayer(m_EthernetLayer);
 	m_ARPLayer->SetUpperLayer(m_IPLayer);
-	m_IPLayer->SetUpperLayer(this);
+	m_IPLayer->SetUpperLayer(m_UDPLayer);
 	m_IPLayer->SetUnderLayer(m_ARPLayer);
-	this->SetUnderLayer(m_IPLayer);
+	m_UDPLayer->SetUnderLayer(m_IPLayer);
+	m_UDPLayer->SetUpperLayer(this);
+	this->SetUnderLayer(m_UDPLayer);
 	//Layer 생성
 }
 
