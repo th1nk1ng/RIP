@@ -58,6 +58,7 @@ public:
 	int Routing(unsigned char destip[4]);
 	pcap_if_t *Devices_1; //interface 0
 	pcap_if_t *Devices_2; //interface 1
+
 	typedef struct _RoutingTable{
 		unsigned char Destnation[4];
 		unsigned char Netmask[4];
@@ -67,9 +68,9 @@ public:
 		int Metric;
 		int expirationTime;
 		int garbageCollectionTime;
-	}RoutingTable,*RoutingTablePtr;
+	}RoutingTableTuple,*RoutingTableTuplePtr;
 
-	CList<RoutingTable, RoutingTable&> route_table;
+	CList<RoutingTableTuple, RoutingTableTuple&> route_table;
 
 	typedef struct _RIPHeader{
 		unsigned char command;

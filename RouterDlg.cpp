@@ -326,7 +326,7 @@ void CRouterDlg::OnBnClickedRoutingAdd()
 {
 	// router Table Add¹öÆ°
 	if( RtDlg.DoModal() == IDOK ){
-		RoutingTable rt;
+		RoutingTableTuple rt;
 		memcpy(&rt.Destnation,RtDlg.GetDestIp(),6);
 		rt.Flag = RtDlg.GetFlag();
 		memcpy(&rt.Gateway,RtDlg.GetGateway(),6);
@@ -371,7 +371,7 @@ void CRouterDlg::setNicList(void)
 
 void CRouterDlg::add_route_table(unsigned char dest[4],unsigned char netmask[4],unsigned char gateway[4],unsigned char flag,char Interface[100],int metric)
 {
-	RoutingTable rt;
+	RoutingTableTuple rt;
 	memcpy(&rt.Destnation,dest,4);
 	memcpy(&rt.Netmask,netmask,4);
 	memcpy(&rt.Gateway,gateway,4);
@@ -386,7 +386,7 @@ void CRouterDlg::UpdateRouteTable(void)
 	ListBox_RoutingTable.DeleteAllItems();
 	CString dest,netmask,gateway,flag,Interface,metric;
 	POSITION index;
-	RoutingTable entry; //head position
+	RoutingTableTuple entry; //head position
 	for(int i=0;i<route_table.GetCount();i++){
 		flag = "";
 		index = route_table.FindIndex(i);
@@ -421,8 +421,8 @@ void CRouterDlg::UpdateRouteTable(void)
 
 int CRouterDlg::Routing(unsigned char destip[4]) {
 	POSITION index;
-	RoutingTable entry;
-	RoutingTable select_entry;
+	RoutingTableTuple entry;
+	RoutingTableTuple select_entry;
 	entry.Interface = -2;
 	select_entry.Interface = -2;
 	unsigned char result[4];
@@ -487,16 +487,14 @@ void CRouterDlg::OnTimer(UINT nIDEvent)
 {
 	switch(nIDEvent){
 	case TICKING_CLOCK:
-		
 		break;
 	case UPDATE_TIMER:
-		this->sendRIP();
+		sendRIP();
 		break;
 	case EXPIRATION_TIMER:
-
+		break;
 	case GARBAGE_COLLECTION_TIMER:
-
-
+		break;
 	}
 }
 
@@ -521,8 +519,8 @@ int CRouterDlg::sendRIP()
 
 		index = route_table.FindIndex(i);
 		
-		newMessage.address_family = htonl(0x0002);
-		newMessage.route_tag = htonl(0x0001);
+		newMessage.address_family = htons(0x0002);
+		newMessage.route_tag = htons(0x0002);
 		memcpy(newMessage.ip_address, route_table.GetAt(index).Destnation, sizeof(char) * 4);
 		memcpy(newMessage.subnet_mask, route_table.GetAt(index).Netmask, sizeof(char) * 4);
 		memset((void*)newMessage.nexthop_ip_address, 0, sizeof(char) * 4);  // Only for linear topology
