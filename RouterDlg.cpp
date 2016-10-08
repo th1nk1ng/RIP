@@ -380,15 +380,26 @@ void CRouterDlg::setNicList(void)
 	m_nic2.SetCurSel(1);
 }	
 
-void CRouterDlg::add_route_table(unsigned char dest[4],unsigned char netmask[4],unsigned char gateway[4],unsigned char flag,char Interface[100],int metric)
+void CRouterDlg::add_route_table(unsigned char dest[4],
+	                             unsigned char netmask[4],
+								 unsigned char gateway[4],
+								 unsigned char flag,
+								 //char Interface[100],
+								 int Interface,
+								 int metric)
 {
+	sc.Lock();
 	RoutingTableTuple rt;
 	memcpy(&rt.Destination,dest,4);
 	memcpy(&rt.Netmask,netmask,4);
 	memcpy(&rt.Gateway,gateway,4);
 	rt.Flag = flag;
-	memcpy(&rt.Interface, Interface, 100);
+	//memcpy(&rt.Interface, Interface, 100);
+	rt.Interface = Interface;
 	rt.Metric = metric;
+	route_table.AddTail(rt);
+	UpdateRouteTable();
+	sc.Unlock();
 }
 
 //UpdateRouteTable
@@ -537,10 +548,9 @@ void CRouterDlg::OnCbnSelchangeNic2Combo()
 int CRouterDlg::sendRIP()
 {
 	RIPHeader header;
-	setHeaderAsRequest(&header);
+	setHeader(&header, 1);
 
-	vector<RIPMessage> messageList;
-	
+	sc.Lock();
 	POSITION index;
 	for(int i = 0; i < route_table.GetCount(); i++){
 		RIPMessage newMessage;
@@ -552,9 +562,10 @@ int CRouterDlg::sendRIP()
 							  route_table.GetAt(index).Netmask,
 							  zeroNextHop,
 							  route_table.GetAt(index).Metric);
-		messageList.push_back(newMessage);
+		header.messages[header.messageCount++] = newMessage;
 	}
-	
+	sc.Unlock();
+
 	unsigned char ppayload[1480];
 	int size = 0;
 
@@ -563,13 +574,6 @@ int CRouterDlg::sendRIP()
 
 	memcpy(ppayload + sizeof(int), (unsigned char *)&header, sizeof(RIPHeader));
 	size += sizeof(RIPHeader);
-
-	for(int i = 0; i < route_table.GetCount(); i++){
-		memcpy(ppayload + sizeof(int) + sizeof(RIPHeader) + (sizeof(RIPMessage) * i), 
-			   (unsigned char *)&(messageList.at(i)), 
-			   sizeof(RIPMessage));
-		size += sizeof(RIPMessage);
-	}
 
 	unsigned char ppayload_copy[1480];
 	memcpy(ppayload_copy, ppayload, size);
@@ -580,7 +584,8 @@ int CRouterDlg::sendRIP()
 						  generalNetmask,
 						  zeroNextHop,
 						  0);
-	memcpy(ppayload + size, (unsigned char *)&leftMessage, sizeof(RIPMessage));
+	header.messages[header.messageCount++] = leftMessage;
+	ppayload[size + sizeof(RIPMessage) + 1] = '\0';
 	m_UDPLayer->Send((unsigned char *)ppayload, strlen((const char *)ppayload), 1);
 
 	RIPMessage rightMessage;
@@ -589,17 +594,107 @@ int CRouterDlg::sendRIP()
 						  generalNetmask,
 						  zeroNextHop,
 						  0);
-	memcpy(ppayload_copy + size, (unsigned char *)&rightMessage, sizeof(RIPMessage));
+	header.messages[header.messageCount-1] = rightMessage;
+	ppayload_copy[size + sizeof(RIPMessage) + 1] = '\0';
 	m_UDPLayer->Send((unsigned char *)ppayload_copy, strlen((const char *)ppayload_copy), 2);
 	
 	return 0;
 }
 
-BOOL Receive(unsigned char* ppayload, int dev_num)
+BOOL CRouterDlg::Receive(unsigned char* ppayload, int dev_num)
 {
-	
+	PRIPHeader header = (PRIPHeader)ppayload;
+	POSITION index;
+	BOOL bSuccess = FALSE;
+
+	if(header->version != RIP_VER_2)
+		return FALSE;
+
+	if(header->command == RIP_COMMAND_REQ){
+		int size = 0;
+	    RIPHeader newHeader;
+
+		sc.Lock();
+		size = generateReplyRIPMessage(&newHeader);
+		bSuccess = mp_UnderLayer->Send((unsigned char*)&newHeader, 
+			                           RIP_HEADER_SIZE + ((size+1) * sizeof(RIPMessage)),
+									   dev_num);
+		sc.Unlock();
+	} else if(header->command == RIP_COMMAND_RES){
+		sc.Lock();
+		updateRouterTableTuples(header, dev_num);
+		sc.Unlock();
+	}
 }
 
+int CRouterDlg::generateReplyRIPMessage(RIPHeader *header)
+{
+	setHeader(header, RIP_COMMAND_RES);
+	for(int i = 0; i < 25; i++){
+		memset((unsigned char*)&header->messages[i], 0, sizeof(RIPMessage));
+	}
+
+	sc.Lock();
+	POSITION index;
+	int size = 0;
+	for(; size < route_table.GetCount(); size++){
+		RIPMessage newMessage;
+
+		index = route_table.FindIndex(size);
+		
+		if(!memcmp(currentIPSrc, route_table.GetAt(index).Destination, sizeof(char) * 4)){
+			continue;
+		}
+
+		generateNewRIPMessage(&newMessage,
+			                  route_table.GetAt(index).Destination,
+							  route_table.GetAt(index).Netmask,
+							  zeroNextHop,
+							  route_table.GetAt(index).Metric);
+		header->messages[header->messageCount++] = newMessage;
+	}
+
+	return size;
+	sc.Unlock();
+}
+
+int CRouterDlg::updateRouterTableTuples(RIPHeader *header, int dev_num)
+{
+	int count = header->messageCount;
+	for(int i = 0; i < count; i++){
+		RIPMessage message = header->messages[i];
+		
+		if(!memcmp(message.ip_address, currentIPSrc, sizeof(char) * 4)){
+			continue;
+		}
+
+		RoutingTableTuple newTuple;
+		memcpy(newTuple.Destination, message.ip_address, sizeof(char) * 4);
+		memcpy(newTuple.Netmask, message.subnet_mask, sizeof(char) * 4);
+		memcpy(newTuple.Gateway, zeroNextHop, sizeof(char) * 4);
+		newTuple.Metric = ntohl(message.metric) + 1;
+		newTuple.Flag = 0;
+		newTuple.Interface = dev_num;
+		newTuple.expirationTime = EXPIRATION_INTERVAL;
+		newTuple.garbageCollectionTime = GARBAGE_COLLECTION_INTERVAL;
+
+		BOOL isNewTuple = TRUE;
+		for(int j = 0; j < route_table.GetCount(); j++){
+			POSITION index;
+			index = route_table.FindIndex(i);
+			if(!memcmp(route_table.GetAt(index).Destination, message.ip_address, sizeof(char) * 4)){
+				isNewTuple = FALSE;
+				route_table.GetAt(index).Metric = newTuple.Metric;
+				break;
+			}
+		}
+
+		if(newTuple.Metric < MAX_HOP && isNewTuple)
+		{
+			route_table.AddTail(newTuple);
+		}
+	}
+}
 void CRouterDlg::generateNewRIPMessage(RIPMessage *newMessage, 
 	                                   unsigned char ipAddress[4],
 									   unsigned char netmask[4],
@@ -612,11 +707,12 @@ void CRouterDlg::generateNewRIPMessage(RIPMessage *newMessage,
 	memcpy(newMessage->nexthop_ip_address, nextHop, sizeof(char) * 4);
 	newMessage->metric = metric;
 }
-void CRouterDlg::setHeaderAsRequest(RIPHeader *header)
+void CRouterDlg::setHeader(RIPHeader *header, unsigned char command)
 {
-	header->command = 1;
+	header->command = command;
 	header->version = 2;
 	header->unused = 0x0000;
+<<<<<<< HEAD
 }
 
 
@@ -634,3 +730,7 @@ void CRouterDlg::OnLvnItemchangedRoutingTable(NMHDR *pNMHDR, LRESULT *pResult)
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
 }
+=======
+	header->messageCount = 0;
+}
+>>>>>>> 478c6de66d312385f5416bc8ae78b789f6e979b7
